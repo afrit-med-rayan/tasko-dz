@@ -1,0 +1,21 @@
+{
+  "name": "tasko-dz",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/link-web-deps.js",
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
+    "dev:web": "npm run dev -w apps/web",
+    "dev:api": "npm run dev -w apps/api",
+    "build": "npm run build -w apps/api && npm run build -w apps/web",
+    "prototype": "powershell -ExecutionPolicy Bypass -File scripts/start-prototype.ps1",
+    "prototype:unix": "bash scripts/start-prototype.sh",
+    "demo:pages": "powershell -ExecutionPolicy Bypass -File scripts/open-demo-pages.ps1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-teal: #1d9e75;
+  --color-teal-dark: #0f6e56;
+  --color-teal-wash: #e1f5ee;
+  --color-amber: #ef9f27;
+  --color-amber-light: #fac775;
+  --color-amber-dark: #ba7517;
+  --color-charcoal: #111210;
+  --color-dark-gray: #444441;
+  --color-mid-gray: #888780;
+  --color-off-white: #f1efe8;
+  --color-light-border: #d3d1c7;
+  --color-success: #eaf3de;
+  --color-success-dark: #3b6d11;
+  --color-danger: #e24b4a;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-off-white text-dark-gray antialiased;
+  font-feature-settings: "cv11", "ss01";
+}
+
+[dir="rtl"] body {
+  font-family: var(--font-noto-arabic), system-ui, sans-serif;
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto max-w-6xl px-4 sm:px-6;
+  }
+
+  .surface-card {
+    @apply rounded-card border border-light-border/80 bg-white shadow-sm;
+  }
+
+  .surface-card-hover {
+    @apply surface-card transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-light/60 hover:shadow-card;
+  }
+
+  .nav-link {
+    @apply text-sm font-medium text-dark-gray transition-colors hover:text-teal;
+  }
+
+  .nav-link-active {
+    @apply text-teal;
+  }
+
+  .input-field {
+    @apply h-12 w-full rounded-lg border border-light-border bg-white px-4 text-dark-gray outline-none transition-all placeholder:text-mid-gray focus:border-teal focus:ring-2 focus:ring-teal/15;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
