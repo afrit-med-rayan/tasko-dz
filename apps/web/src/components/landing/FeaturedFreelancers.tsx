@@ -1,13 +1,7 @@
-import { getFeaturedFreelancers, type FreelancerSummary } from "@/lib/api";
+import { getFeaturedFreelancers } from "@/lib/api";
 import { FeaturedFreelancersClient } from "./FeaturedFreelancersClient";
 
-export async function FeaturedFreelancers() {
-  let freelancers: FreelancerSummary[] = [];
-  try {
-    freelancers = await getFeaturedFreelancers();
-  } catch {
-    freelancers = [];
-  }
-
+export function FeaturedFreelancers() {
+  const freelancers = getFeaturedFreelancers();
   return <FeaturedFreelancersClient freelancers={freelancers} />;
 }

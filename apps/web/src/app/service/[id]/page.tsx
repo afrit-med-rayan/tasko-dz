@@ -7,22 +7,15 @@ interface Props {
   params: { id: string };
 }
 
-export async function generateMetadata({ params }: Props) {
-  try {
-    const s = await getService(params.id);
-    return { title: `${s.title} — Tasko` };
-  } catch {
-    return { title: "Service — Tasko" };
-  }
+export function generateMetadata({ params }: Props) {
+  const s = getService(params.id);
+  if (!s) return { title: "Service — Tasko" };
+  return { title: `${s.title} — Tasko` };
 }
 
-export default async function ServicePage({ params }: Props) {
-  let service;
-  try {
-    service = await getService(params.id);
-  } catch {
-    notFound();
-  }
+export default function ServicePage({ params }: Props) {
+  const service = getService(params.id);
+  if (!service) notFound();
 
   return (
     <PageShell>

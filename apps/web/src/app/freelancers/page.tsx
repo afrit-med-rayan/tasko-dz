@@ -10,17 +10,11 @@ interface Props {
   searchParams: { q?: string; category?: string };
 }
 
-export default async function FreelancersPage({ searchParams }: Props) {
-  let data: Awaited<ReturnType<typeof searchFreelancers>> = { data: [], meta: { total: 0 } };
-  try {
-    data = await searchFreelancers({
-      q: searchParams.q,
-      category: searchParams.category,
-      limit: 20,
-    });
-  } catch {
-    /* API offline */
-  }
+export default function FreelancersPage({ searchParams }: Props) {
+  const data = searchFreelancers({
+    q: searchParams.q,
+    category: searchParams.category,
+  });
 
   return (
     <PageShell>

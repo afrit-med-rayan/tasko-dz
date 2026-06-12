@@ -7,27 +7,20 @@ interface Props {
   params: { username: string };
 }
 
-export async function generateMetadata({ params }: Props) {
-  try {
-    const f = await getFreelancerPublic(params.username);
-    return {
-      title: `${f.name} — ${f.specialty} sur Tasko`,
-      description: `${f.name}, freelancer ${f.specialty} à ${f.city} noté ${f.averageRating}/5 sur Tasko.`,
-    };
-  } catch {
-    return { title: "Freelancer — Tasko" };
-  }
+export function generateMetadata({ params }: Props) {
+  const f = getFreelancerPublic(params.username);
+  if (!f) return { title: "Freelancer — Tasko" };
+  return {
+    title: `${f.name} — ${f.specialty} sur Tasko`,
+    description: `${f.name}, freelancer ${f.specialty} à ${f.city} noté ${f.averageRating}/5 sur Tasko.`,
+  };
 }
 
-export default async function FreelancerPage({ params }: Props) {
-  let profile;
-  let reviews: Awaited<ReturnType<typeof getFreelancerReviews>> = { data: [], averageRating: 0 };
-  try {
-    profile = await getFreelancerPublic(params.username);
-    reviews = await getFreelancerReviews(profile.id);
-  } catch {
-    notFound();
-  }
+export default function FreelancerPage({ params }: Props) {
+  const profile = getFreelancerPublic(params.username);
+  if (!profile) notFound();
+
+  const reviews = getFreelancerReviews(profile.id);
 
   return (
     <PageShell>

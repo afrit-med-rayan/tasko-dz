@@ -10,13 +10,25 @@ import { Input } from "@/components/ui/Input";
 import { Logo } from "@/components/ui/Logo";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-// Demo shortcuts for easy v0 testing
+// Demo accounts — no API needed
 const DEMO_ACCOUNTS = [
-  { label: "Freelancer Demo", phone: "+213655000001", role: "FREELANCER", dashboard: "/freelancer/dashboard" },
-  { label: "Client Demo", phone: "+213655000002", role: "CLIENT", dashboard: "/client/dashboard" },
+  {
+    label: "Freelancer Demo",
+    phone: "+213655000001",
+    role: "FREELANCER",
+    name: "Yacine Bensalem",
+    dashboard: "/freelancer/dashboard",
+  },
+  {
+    label: "Client Demo",
+    phone: "+213655000002",
+    role: "CLIENT",
+    name: "Nadia Khelifi",
+    dashboard: "/client/dashboard",
+  },
 ];
+
+const DEV_OTP = "1234";
 
 export default function LoginPage() {
   const { t } = useLocale();
@@ -29,99 +41,55 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // Step 1 — send OTP (mock: just navigate to OTP step)
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (!phone.trim()) { setError("Numéro requis."); return; }
     setError("");
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? "Erreur");
-      sessionStorage.setItem("tasko-phone", phone);
-      // Pre-set role from demo accounts
-      const demo = DEMO_ACCOUNTS.find((d) => d.phone === phone);
-      if (demo) sessionStorage.setItem("tasko-role", demo.role);
-      router.push("/connexion?step=otp");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur");
-    } finally {
-      setLoading(false);
-    }
+    sessionStorage.setItem("tasko-phone", phone);
+    router.push("/connexion?step=otp");
   };
 
-  const handleVerify = async (e: React.FormEvent) => {
+  // Step 2 — verify OTP (mock: accept "1234")
+  const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    if (otp !== DEV_OTP) {
+      setError("Code incorrect. Utilisez 1234 pour la démo.");
+      return;
+    }
     const storedPhone = sessionStorage.getItem("tasko-phone") ?? phone;
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: storedPhone, otp }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? "Erreur");
-      // Persist session
-      localStorage.setItem("tasko-token", data.accessToken);
-      const user = data.user as { role?: string } | undefined;
-      const role = user?.role ?? sessionStorage.getItem("tasko-role") ?? "CLIENT";
-      localStorage.setItem("tasko-role", role);
-      localStorage.setItem("tasko-user", JSON.stringify(data.user ?? {}));
-      // Route to correct dashboard
-      const dest = role === "FREELANCER" ? "/freelancer/dashboard" : "/client/dashboard";
-      router.push(dest);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur");
-    } finally {
-      setLoading(false);
-    }
+    const demo = DEMO_ACCOUNTS.find((d) => d.phone === storedPhone);
+    const role = demo?.role ?? sessionStorage.getItem("tasko-role") ?? "CLIENT";
+    const name = demo?.name ?? "Utilisateur";
+    localStorage.setItem("tasko-token", `mock-token-${Date.now()}`);
+    localStorage.setItem("tasko-role", role);
+    localStorage.setItem("tasko-user", JSON.stringify({ name, role }));
+    router.push(role === "FREELANCER" ? "/freelancer/dashboard" : "/client/dashboard");
   };
 
-  const quickLogin = async (demo: (typeof DEMO_ACCOUNTS)[0]) => {
+  // Quick demo login — 1 click
+  const quickLogin = (demo: (typeof DEMO_ACCOUNTS)[0]) => {
     setLoading(true);
-    setError("");
-    try {
-      // Register/login the demo account
-      await fetch(`${API_BASE}/api/v1/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: demo.phone, name: demo.label, role: demo.role }),
-      });
-      sessionStorage.setItem("tasko-phone", demo.phone);
-      sessionStorage.setItem("tasko-role", demo.role);
-      // Verify with dev OTP
-      const res = await fetch(`${API_BASE}/api/v1/auth/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: demo.phone, otp: "1234" }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? "Erreur");
-      localStorage.setItem("tasko-token", data.accessToken);
+    setTimeout(() => {
+      localStorage.setItem("tasko-token", `mock-token-${Date.now()}`);
       localStorage.setItem("tasko-role", demo.role);
-      localStorage.setItem("tasko-user", JSON.stringify(data.user ?? {}));
+      localStorage.setItem("tasko-user", JSON.stringify({ name: demo.name, role: demo.role }));
       router.push(demo.dashboard);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur");
-    } finally {
-      setLoading(false);
-    }
+    }, 400);
   };
 
-  const storedPhone = typeof globalThis.window !== "undefined" ? sessionStorage.getItem("tasko-phone") : "";
+  const storedPhone =
+    typeof globalThis.window !== "undefined"
+      ? sessionStorage.getItem("tasko-phone")
+      : "";
 
-  // ── OTP Step ────────────────────────────────────────────────────────────────
+  // ── OTP Step ──────────────────────────────────────────────────────────────
   if (isOtpStep) {
     return (
       <PageShell>
         <div className="flex min-h-[80vh] items-center justify-center bg-gradient-to-b from-teal-wash/40 to-off-white px-4 py-16">
           <div className="surface-card w-full max-w-md overflow-hidden shadow-elevated">
-            {/* Top bar */}
             <div className="bg-gradient-to-r from-teal to-teal-dark px-8 py-6 text-center text-white">
               <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20">
                 <Smartphone size={28} strokeWidth={1.5} />
@@ -132,16 +100,13 @@ export default function LoginPage() {
                 <span className="font-semibold">{storedPhone ?? phone}</span>
               </p>
             </div>
-
             <div className="p-8">
-              {/* Dev hint */}
               <div className="mb-6 flex items-center gap-3 rounded-xl bg-amber-light/30 px-4 py-3">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber/20 text-amber-dark">
                   <Shield size={16} />
                 </span>
                 <p className="text-xs font-medium text-amber-dark">{t.auth.devOtp}</p>
               </div>
-
               <form onSubmit={handleVerify} className="space-y-4">
                 <Input
                   label={t.auth.otpCode}
@@ -153,16 +118,13 @@ export default function LoginPage() {
                   required
                 />
                 {error && (
-                  <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-danger">
-                    {error}
-                  </div>
+                  <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-danger">{error}</div>
                 )}
-                <Button type="submit" size="lg" loading={loading}>
+                <Button type="submit" size="lg">
                   {t.auth.verify}
-                  {!loading && <ArrowRight size={16} />}
+                  <ArrowRight size={16} />
                 </Button>
               </form>
-
               <button
                 type="button"
                 onClick={() => router.push("/connexion")}
@@ -177,12 +139,11 @@ export default function LoginPage() {
     );
   }
 
-  // ── Phone Step ───────────────────────────────────────────────────────────────
+  // ── Phone Step ────────────────────────────────────────────────────────────
   return (
     <PageShell>
       <div className="flex min-h-[80vh] items-center justify-center bg-gradient-to-b from-teal-wash/40 to-off-white px-4 py-16">
         <div className="surface-card w-full max-w-md overflow-hidden shadow-elevated">
-          {/* Header */}
           <div className="border-b border-light-border/60 px-8 py-6">
             <div className="mb-4 flex justify-center">
               <Logo />
@@ -192,7 +153,6 @@ export default function LoginPage() {
             </h1>
             <p className="mt-1 text-center text-sm text-mid-gray">{t.auth.loginHint}</p>
           </div>
-
           <div className="p-8">
             <form onSubmit={handleLogin} className="space-y-4">
               <Input
@@ -205,9 +165,9 @@ export default function LoginPage() {
               {error && (
                 <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-danger">{error}</div>
               )}
-              <Button type="submit" size="lg" loading={loading}>
+              <Button type="submit" size="lg">
                 {t.auth.login}
-                {!loading && <ArrowRight size={16} />}
+                <ArrowRight size={16} />
               </Button>
             </form>
 

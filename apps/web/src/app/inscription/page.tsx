@@ -10,8 +10,6 @@ import { Input } from "@/components/ui/Input";
 import { Logo } from "@/components/ui/Logo";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
 const TRUST_ITEMS = [
   "Paiements 100% DZD",
   "Escrow sécurisé sur chaque commande",
@@ -30,26 +28,21 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim() || !phone.trim()) {
+      setError("Tous les champs sont requis.");
+      return;
+    }
     setLoading(true);
     setError("");
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, role }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? "Erreur");
-      sessionStorage.setItem("tasko-phone", phone);
-      sessionStorage.setItem("tasko-role", role);
+    // Mock: store in session and go to OTP step
+    sessionStorage.setItem("tasko-phone", phone);
+    sessionStorage.setItem("tasko-role", role);
+    sessionStorage.setItem("tasko-name", name);
+    setTimeout(() => {
       router.push("/connexion?step=otp");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur");
-    } finally {
-      setLoading(false);
-    }
+    }, 400);
   };
 
   return (
@@ -95,11 +88,7 @@ export default function RegisterPage() {
                       >
                         <Icon size={18} />
                       </div>
-                      <span
-                        className={`text-sm font-semibold ${
-                          isSelected ? "text-teal-dark" : "text-dark-gray"
-                        }`}
-                      >
+                      <span className={`text-sm font-semibold ${isSelected ? "text-teal-dark" : "text-dark-gray"}`}>
                         {r === "FREELANCER" ? t.auth.roleFreelancer : t.auth.roleClient}
                       </span>
                     </button>

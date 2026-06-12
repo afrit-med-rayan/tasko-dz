@@ -1,13 +1,7 @@
-import { getCategories, type Category } from "@/lib/api";
+import { getCategories } from "@/lib/api";
 import { CategoryGrid } from "./CategoryGrid";
 
-export async function CategoryShowcase() {
-  let categories: Category[] = [];
-  try {
-    categories = await getCategories();
-  } catch {
-    categories = [];
-  }
-
+export function CategoryShowcase() {
+  const categories = getCategories();
   return <CategoryGrid categories={categories} />;
 }
