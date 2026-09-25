@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, Shield, Briefcase, UserCircle } from "lucide-react";
+import { ArrowRight, Shield, Briefcase, UserCircle, CheckCircle2 } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Logo } from "@/components/ui/Logo";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
@@ -23,15 +22,53 @@ export default function RegisterPage() {
   const [role, setRole] = useState<"FREELANCER" | "CLIENT">(
     (searchParams.get("role") as "FREELANCER" | "CLIENT") ?? "CLIENT"
   );
+  
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [isNameValid, setIsNameValid] = useState(false);
+  const [isPhoneValid, setIsPhoneValid] = useState(false);
+  const [nameTouched, setNameTouched] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Auto-format phone to +213 XX XX XX XX
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/[^\d+]/g, "");
+    if (!val.startsWith("+213") && val.startsWith("0")) {
+      val = "+213" + val.slice(1);
+    } else if (!val.startsWith("+213") && val.length > 0 && val[0] !== "+") {
+      val = "+213" + val;
+    }
+    
+    // Format with spaces
+    const digits = val.replace(/[^\d]/g, "");
+    let formatted = "+";
+    if (digits.length > 0) formatted += digits.slice(0, 3); // 213
+    if (digits.length > 3) formatted += " " + digits.slice(3, 5); // XX
+    if (digits.length > 5) formatted += " " + digits.slice(5, 7); // XX
+    if (digits.length > 7) formatted += " " + digits.slice(7, 9); // XX
+    if (digits.length > 9) formatted += " " + digits.slice(9, 11); // XX
+    
+    setPhone(formatted);
+    setIsPhoneValid(digits.length === 11);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+    setIsNameValid(e.target.value.trim().length >= 3);
+  };
+
+  const isFormValid = isNameValid && isPhoneValid;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !phone.trim()) {
-      setError("Tous les champs sont requis.");
+    setNameTouched(true);
+    setPhoneTouched(true);
+
+    if (!isFormValid) {
+      setError("Veuillez remplir correctement tous les champs requis.");
       return;
     }
     setLoading(true);
@@ -58,14 +95,14 @@ export default function RegisterPage() {
               {t.auth.register}
             </h1>
             <p className="mt-1 text-center text-sm text-mid-gray">
-              Algeria&apos;s first trusted freelance marketplace
+              Algeria's first trusted freelance marketplace
             </p>
           </div>
 
           <div className="p-8">
             {/* Role selector */}
             <div className="mb-6">
-              <p className="mb-3 text-sm font-medium text-charcoal">Je suis…</p>
+              <p className="mb-3 text-sm font-medium text-charcoal">Je suis...</p>
               <div className="grid grid-cols-2 gap-3">
                 {(["CLIENT", "FREELANCER"] as const).map((r) => {
                   const Icon = r === "FREELANCER" ? Briefcase : UserCircle;
@@ -98,24 +135,60 @@ export default function RegisterPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                label={t.auth.name}
-                placeholder="Yacine Bensalem"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <Input
-                label={t.auth.phone}
-                placeholder="+213 6XX XX XX XX"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-charcoal">
+                  {t.auth.name}
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    className={`h-12 w-full rounded-xl border px-4 pr-10 text-dark-gray outline-none transition-all placeholder:text-mid-gray focus:ring-2 focus:ring-teal/10 ${
+                      nameTouched && !isNameValid ? 'border-danger focus:border-danger' : 'border-light-border focus:border-teal'
+                    }`}
+                    placeholder="Yacine Bensalem"
+                    value={name}
+                    onChange={handleNameChange}
+                    onBlur={() => setNameTouched(true)}
+                  />
+                  {isNameValid && (
+                    <CheckCircle2 size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-teal" />
+                  )}
+                </div>
+                {nameTouched && !isNameValid && (
+                  <p className="mt-1.5 text-xs text-danger">Veuillez entrer votre nom complet.</p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-charcoal">
+                  {t.auth.phone}
+                </label>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    className={`h-12 w-full rounded-xl border px-4 pr-10 text-dark-gray outline-none transition-all placeholder:text-mid-gray focus:ring-2 focus:ring-teal/10 ${
+                      phoneTouched && !isPhoneValid ? 'border-danger focus:border-danger' : 'border-light-border focus:border-teal'
+                    }`}
+                    placeholder="+213 6XX XX XX XX"
+                    value={phone}
+                    onChange={handlePhoneChange}
+                    onBlur={() => setPhoneTouched(true)}
+                  />
+                  {isPhoneValid && (
+                    <CheckCircle2 size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-teal" />
+                  )}
+                </div>
+                {phoneTouched && !isPhoneValid && (
+                  <p className="mt-1.5 text-xs text-danger">Numéro de téléphone invalide.</p>
+                )}
+              </div>
+
               {error && (
                 <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-danger">{error}</div>
               )}
-              <Button type="submit" size="lg" loading={loading} className="mt-2">
+              
+              <Button type="submit" size="lg" loading={loading} disabled={!isFormValid && (nameTouched || phoneTouched)} className="mt-2 w-full h-[52px]">
                 {t.auth.submit}
                 {!loading && <ArrowRight size={16} />}
               </Button>

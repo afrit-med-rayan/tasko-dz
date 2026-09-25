@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/Input";
 import { Logo } from "@/components/ui/Logo";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
-// Demo accounts — no API needed
+// Demo accounts - no API needed
 const DEMO_ACCOUNTS = [
   {
     label: "Freelancer Demo",
@@ -41,7 +41,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Step 1 — send OTP (mock: just navigate to OTP step)
+  // Step 1 - send OTP (mock: just navigate to OTP step)
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone.trim()) { setError("Numéro requis."); return; }
@@ -50,7 +50,7 @@ export default function LoginPage() {
     router.push("/connexion?step=otp");
   };
 
-  // Step 2 — verify OTP (mock: accept "1234")
+  // Step 2 - verify OTP (mock: accept "1234")
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -68,7 +68,7 @@ export default function LoginPage() {
     router.push(role === "FREELANCER" ? "/freelancer/dashboard" : "/client/dashboard");
   };
 
-  // Quick demo login — 1 click
+  // Quick demo login - 1 click
   const quickLogin = (demo: (typeof DEMO_ACCOUNTS)[0]) => {
     setLoading(true);
     setTimeout(() => {

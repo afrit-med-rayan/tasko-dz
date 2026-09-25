@@ -6,6 +6,7 @@ import { servicesRouter } from "./routes/services";
 import { categoriesRouter } from "./routes/categories";
 import { authRouter } from "./routes/auth";
 import { demoRouter } from "./routes/demo";
+import { ordersRouter } from "./routes/orders";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -24,6 +25,7 @@ app.use("/api/v1/services", servicesRouter);
 app.use("/api/v1/categories", categoriesRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/demo", demoRouter);
+app.use("/api/v1/orders", ordersRouter);
 
 app.use((_req, res) => {
   res.status(404).json({ error: "NOT_FOUND", message: "Endpoint introuvable." });

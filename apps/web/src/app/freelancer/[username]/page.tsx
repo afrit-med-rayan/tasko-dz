@@ -9,9 +9,9 @@ interface Props {
 
 export function generateMetadata({ params }: Props) {
   const f = getFreelancerPublic(params.username);
-  if (!f) return { title: "Freelancer — Tasko" };
+  if (!f) return { title: "Freelancer - Tasko" };
   return {
-    title: `${f.name} — ${f.specialty} sur Tasko`,
+    title: `${f.name} - ${f.specialty} sur Tasko`,
     description: `${f.name}, freelancer ${f.specialty} à ${f.city} noté ${f.averageRating}/5 sur Tasko.`,
   };
 }

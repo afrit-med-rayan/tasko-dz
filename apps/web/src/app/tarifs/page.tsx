@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ArrowRight, Shield, Users, Banknote, Zap } from "lucide-react";
+import { Check, ArrowRight, Shield, Users, Banknote, Zap, X } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
@@ -9,7 +9,7 @@ const COMPARISON = [
   { platform: "Upwork", commission: "20%", dzd: "Non", escrow: "Oui", local: "Non" },
   { platform: "Fiverr", commission: "20%", dzd: "Non", escrow: "Oui", local: "Non" },
   { platform: "Instagram/DM", commission: "0%", dzd: "Oui", escrow: "Non", local: "Oui" },
-  { platform: "Tasko ✓", commission: "10%", dzd: "Oui", escrow: "Oui", local: "Oui", highlight: true },
+  { platform: "Tasko", commission: "10%", dzd: "Oui", escrow: "Oui", local: "Oui", highlight: true },
 ];
 
 export default function PricingPage() {
@@ -135,7 +135,7 @@ export default function PricingPage() {
                     <th className="px-5 py-3.5">Commission</th>
                     <th className="px-5 py-3.5">Paiement DZD</th>
                     <th className="px-5 py-3.5">Escrow</th>
-                    <th className="px-5 py-3.5">Local 🇩🇿</th>
+                    <th className="px-5 py-3.5">Local (DZ)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -154,18 +154,18 @@ export default function PricingPage() {
                       </td>
                       <td className="px-5 py-3.5 text-center">
                         {row.dzd === "Oui"
-                          ? <span className="text-teal font-bold">✓</span>
-                          : <span className="text-mid-gray">✗</span>}
+                          ? <span className="inline-flex text-teal font-bold"><Check size={16} /></span>
+                          : <span className="inline-flex text-mid-gray"><X size={16} /></span>}
                       </td>
                       <td className="px-5 py-3.5 text-center">
                         {row.escrow === "Oui"
-                          ? <span className="text-teal font-bold">✓</span>
-                          : <span className="text-mid-gray">✗</span>}
+                          ? <span className="inline-flex text-teal font-bold"><Check size={16} /></span>
+                          : <span className="inline-flex text-mid-gray"><X size={16} /></span>}
                       </td>
                       <td className="px-5 py-3.5 text-center">
                         {row.local === "Oui"
-                          ? <span className="text-teal font-bold">✓</span>
-                          : <span className="text-mid-gray">✗</span>}
+                          ? <span className="inline-flex text-teal font-bold"><Check size={16} /></span>
+                          : <span className="inline-flex text-mid-gray"><X size={16} /></span>}
                       </td>
                     </tr>
                   ))}

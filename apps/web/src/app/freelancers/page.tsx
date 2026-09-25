@@ -3,7 +3,7 @@ import { searchFreelancers } from "@/lib/api";
 import { FreelancersList } from "./FreelancersList";
 
 export const metadata = {
-  title: "Freelancers — Tasko",
+  title: "Freelancers - Tasko",
 };
 
 interface Props {

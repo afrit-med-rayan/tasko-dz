@@ -9,8 +9,8 @@ interface Props {
 
 export function generateMetadata({ params }: Props) {
   const s = getService(params.id);
-  if (!s) return { title: "Service — Tasko" };
-  return { title: `${s.title} — Tasko` };
+  if (!s) return { title: "Service - Tasko" };
+  return { title: `${s.title} - Tasko` };
 }
 
 export default function ServicePage({ params }: Props) {

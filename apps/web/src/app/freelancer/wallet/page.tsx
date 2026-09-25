@@ -21,7 +21,7 @@ const TRANSACTIONS = [
   {
     id: "t1",
     type: "FREELANCER_CREDIT" as const,
-    label: "Logo professionnel — Sonia B.",
+    label: "Logo professionnel - Sonia B.",
     amount: 3150,
     direction: "CREDIT" as const,
     date: "2026-06-05",
@@ -30,7 +30,7 @@ const TRANSACTIONS = [
   {
     id: "t2",
     type: "FREELANCER_CREDIT" as const,
-    label: "Carte de visite — Karim M.",
+    label: "Carte de visite - Karim M.",
     amount: 2250,
     direction: "CREDIT" as const,
     date: "2026-06-01",
@@ -48,7 +48,7 @@ const TRANSACTIONS = [
   {
     id: "t4",
     type: "FREELANCER_CREDIT" as const,
-    label: "Identité visuelle — Nadia K.",
+    label: "Identité visuelle - Nadia K.",
     amount: 5400,
     direction: "CREDIT" as const,
     date: "2026-05-20",
@@ -57,7 +57,7 @@ const TRANSACTIONS = [
   {
     id: "t5",
     type: "FREELANCER_CREDIT" as const,
-    label: "Logo startups — Mehdi A.",
+    label: "Logo startups - Mehdi A.",
     amount: 3150,
     direction: "CREDIT" as const,
     date: "2026-05-14",

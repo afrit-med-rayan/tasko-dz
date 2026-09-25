@@ -1,15 +1,15 @@
 "use client";
+import { useEffect, useState } from "react";
 
 import Link from "next/link";
 import {
   Wallet, Star, TrendingUp, ArrowUpRight,
-  Plus, ShoppingBag,
+  Plus, ShoppingBag, Clock,
 } from "lucide-react";
 import { DashboardShell, DashboardNewServiceButton } from "@/components/dashboard/DashboardShell";
 import { OrderStatusBadge } from "@/components/ui/OrderStatusBadge";
 import { StarRating } from "@/components/ui/StarRating";
 import { Avatar } from "@/components/ui/Avatar";
-import { FREELANCER_DEMO } from "@/lib/demo-data";
 import { DEMO_USERS } from "@/lib/i18n/translations";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { formatDzd } from "@/lib/api";
@@ -18,7 +18,33 @@ export default function FreelancerDashboardPage() {
   const { t, locale } = useLocale();
   const d = t.dashboard.freelancer;
   const user = DEMO_USERS.freelancer;
-  const data = FREELANCER_DEMO;
+
+  const [orders, setOrders] = useState<any[]>([]);
+  const [freelancer, setFreelancer] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("http://localhost:4000/api/v1/orders", {
+        headers: { "x-user-id": "f1", "x-user-role": "FREELANCER" }
+      }).then(res => res.json()),
+      fetch("http://localhost:4000/api/v1/demo/freelancers/yacine-bensalem").then(res => res.json())
+    ]).then(([ordersData, freelancerData]) => {
+      setOrders(ordersData || []);
+      setFreelancer(freelancerData);
+      setLoading(false);
+    });
+  }, []);
+
+  const activeOrdersCount = orders.filter(o => o.status !== "COMPLETED" && o.status !== "CANCELLED" && o.status !== "PENDING_PAYMENT").length;
+  const pendingDeliveryCount = orders.filter(o => o.status === "ACTIVE").length;
+  const earnings = orders.filter(o => o.status === "COMPLETED").reduce((acc, o) => acc + ((o.priceDzd || o.amountDzd || 0) * 0.9), 0);
+  const inEscrow = orders.filter(o => o.status === "ACTIVE" || o.status === "DELIVERED" || o.status === "REVISION").reduce((acc, o) => acc + (o.priceDzd || o.amountDzd || 0), 0);
+
+  const rating = freelancer?.averageRating || 4.9;
+  const reviewCount = freelancer?.totalReviews || 47;
+  const completionRate = 98; // Hardcoded mock
+  const services = freelancer?.services || [];
 
   return (
     <DashboardShell
@@ -36,7 +62,7 @@ export default function FreelancerDashboardPage() {
 
       {/* KPI grid */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {/* Balance — teal highlight card */}
+        {/* Balance - teal highlight card */}
         <div className="surface-card col-span-1 overflow-hidden bg-gradient-to-br from-teal to-teal-dark text-white sm:col-span-2 xl:col-span-1">
           <div className="p-5">
             <div className="flex items-center justify-between">
@@ -44,10 +70,10 @@ export default function FreelancerDashboardPage() {
               <Wallet size={18} className="text-white/50" />
             </div>
             <p className="mt-3 text-3xl font-bold tracking-tight">
-              {formatDzd(data.balance, locale)}
+              {formatDzd(earnings, locale)}
             </p>
             <p className="mt-1 text-xs text-white/60">
-              {formatDzd(data.inEscrow, locale)} en escrow
+              {formatDzd(inEscrow, locale)} en escrow
             </p>
             <button
               type="button"
@@ -65,9 +91,9 @@ export default function FreelancerDashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-mid-gray">{d.activeOrders}</p>
             <ShoppingBag size={18} className="text-teal" />
           </div>
-          <p className="mt-3 text-3xl font-bold tracking-tight text-charcoal">{data.activeOrders}</p>
+          <p className="mt-3 text-3xl font-bold tracking-tight text-charcoal">{activeOrdersCount}</p>
           <p className="mt-1 text-xs text-mid-gray">
-            {data.pendingDelivery} {d.pendingDelivery}
+            {pendingDeliveryCount} {d.pendingDelivery}
           </p>
         </div>
 
@@ -78,7 +104,7 @@ export default function FreelancerDashboardPage() {
             <Star size={18} className="text-teal" />
           </div>
           <div className="mt-3">
-            <StarRating rating={data.rating} reviewCount={data.reviewCount} size="md" />
+            <StarRating rating={rating} reviewCount={reviewCount} size="md" />
           </div>
         </div>
 
@@ -88,11 +114,11 @@ export default function FreelancerDashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-mid-gray">{d.completionRate}</p>
             <TrendingUp size={18} className="text-teal" />
           </div>
-          <p className="mt-3 text-3xl font-bold tracking-tight text-charcoal">{data.completionRate}%</p>
+          <p className="mt-3 text-3xl font-bold tracking-tight text-charcoal">{completionRate}%</p>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-off-white">
             <div
               className="h-full rounded-full bg-teal"
-              style={{ width: `${data.completionRate}%` }}
+              style={{ width: `${completionRate}%` }}
             />
           </div>
         </div>
@@ -103,7 +129,7 @@ export default function FreelancerDashboardPage() {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-charcoal">{d.recentOrders}</h2>
           <span className="rounded-full bg-amber-light/60 px-2.5 py-0.5 text-xs font-semibold text-amber-dark">
-            {data.orders.length} commandes
+            {orders.length} commandes
           </span>
         </div>
         <div className="surface-card overflow-hidden">
@@ -120,27 +146,29 @@ export default function FreelancerDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.orders.map((order) => (
+                {loading ? (
+                  <tr><td colSpan={6} className="p-5 text-center text-mid-gray">Chargement...</td></tr>
+                ) : orders.map((order) => (
                   <tr
                     key={order.id}
                     className="border-b border-light-border/50 last:border-0 hover:bg-off-white/40 transition-colors"
                   >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2.5">
-                        <Avatar name={order.clientName} size="sm" className="!h-7 !w-7 !text-xs" />
-                        <span className="font-medium text-charcoal">{order.clientName}</span>
+                        <Avatar name={order.clientName || "Client"} size="sm" className="!h-7 !w-7 !text-xs" />
+                        <span className="font-medium text-charcoal">{order.clientName || "Client"}</span>
                       </div>
                     </td>
                     <td className="max-w-[200px] px-5 py-4 text-dark-gray">
-                      <span className="line-clamp-1">{order.service}</span>
+                      <span className="line-clamp-1">{order.serviceId || order.service}</span>
                     </td>
                     <td className="px-5 py-4 font-semibold text-teal">
-                      {formatDzd(order.amountDzd, locale)}
+                      {formatDzd(order.priceDzd || order.amountDzd || 0, locale)}
                     </td>
                     <td className="px-5 py-4">
                       <OrderStatusBadge status={order.status} />
                     </td>
-                    <td className="px-5 py-4 text-mid-gray">{order.date}</td>
+                    <td className="px-5 py-4 text-mid-gray">{new Date(order.createdAt || order.date).toLocaleDateString(locale)}</td>
                     <td className="px-5 py-4">
                       <Link
                         href={`/freelancer/orders/${order.id}`}
@@ -170,7 +198,7 @@ export default function FreelancerDashboardPage() {
           </button>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          {data.services.map((s) => (
+          {services.map((s: any) => (
             <div key={s.id} className="surface-card-hover group p-5">
               <div className="flex items-start justify-between gap-3">
                 <h3 className="font-semibold text-charcoal transition-colors group-hover:text-teal">
@@ -182,12 +210,12 @@ export default function FreelancerDashboardPage() {
               </div>
               <p className="mt-2 text-xl font-bold text-teal">{formatDzd(s.priceDzd, locale)}</p>
               <p className="mt-1 text-xs text-mid-gray">
-                {s.orders} {t.freelancers.orders}
+                {s.completedOrdersCount || 0} {t.freelancers.orders}
               </p>
               <div className="mt-3 h-1 w-full rounded-full bg-off-white">
                 <div
                   className="h-full rounded-full bg-teal/60"
-                  style={{ width: `${Math.min((s.orders / 30) * 100, 100)}%` }}
+                  style={{ width: `${Math.min(((s.completedOrdersCount || 0) / 30) * 100, 100)}%` }}
                 />
               </div>
               <Link

@@ -14,7 +14,7 @@ const notoArabic = Noto_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "Tasko — La marketplace des talents algériens",
+  title: "Tasko - La marketplace des talents algériens",
   description:
     "Marketplace algérienne de services digitaux. Paiement DZD, escrow sécurisé, freelancers vérifiés.",
 };

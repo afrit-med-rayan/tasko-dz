@@ -14,7 +14,7 @@ const stepIcons = [Search, UserCircle, FileText, Lock, MessageSquare, Package, C
 const FAQ = [
   {
     q: "Qu'est-ce que l'escrow Tasko ?",
-    a: "Quand vous payez une commande, vos fonds sont bloqués (escrow) sur Tasko — ni le client ni le freelancer ne peut les toucher. Les fonds ne sont libérés vers le freelancer qu'après confirmation de la livraison.",
+    a: "Quand vous payez une commande, vos fonds sont bloqués (escrow) sur Tasko - ni le client ni le freelancer ne peut les toucher. Les fonds ne sont libérés vers le freelancer qu'après confirmation de la livraison.",
   },
   {
     q: "Comment fonctionne le paiement BaridiMob ?",

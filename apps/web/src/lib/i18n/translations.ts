@@ -56,7 +56,7 @@ export const translations = {
     trust: {
       escrow: { title: "Escrow sécurisé", desc: "Vos fonds sont protégés jusqu'à la livraison confirmée" },
       verified: { title: "Freelancers vérifiés", desc: "Identité et historique de transactions vérifiés" },
-      payment: { title: "Paiement 100% DZD", desc: "BaridiMob et CIB — sans conversion de devise" },
+      payment: { title: "Paiement 100% DZD", desc: "BaridiMob et CIB - sans conversion de devise" },
     },
     testimonials: {
       title: "Ce que disent nos utilisateurs",
@@ -195,7 +195,7 @@ export const translations = {
         amount: "Montant",
         status: "Statut",
         date: "Date",
-        demoNote: "Compte démo — Yacine Bensalem, freelancer design graphique",
+        demoNote: "Compte démo - Yacine Bensalem, freelancer design graphique",
       },
       client: {
         title: "Mon espace client",
@@ -213,7 +213,7 @@ export const translations = {
         amount: "Montant",
         status: "Statut",
         date: "Date",
-        demoNote: "Compte démo — Nadia Khelifi, cliente à Alger",
+        demoNote: "Compte démo - Nadia Khelifi, cliente à Alger",
       },
       status: {
         ACTIVE: "En cours",
@@ -284,7 +284,7 @@ export const translations = {
     trust: {
       escrow: { title: "ضمان آمن", desc: "أموالك محمية حتى تأكيد التسليم" },
       verified: { title: "مستقلون موثوقون", desc: "هوية وسجل معاملات موثق" },
-      payment: { title: "دفع 100% بالدينار", desc: "بريدي موب و CIB — بدون تحويل عملة" },
+      payment: { title: "دفع 100% بالدينار", desc: "بريدي موب و CIB - بدون تحويل عملة" },
     },
     testimonials: {
       title: "ماذا يقول مستخدمونا",
@@ -420,7 +420,7 @@ export const translations = {
         amount: "المبلغ",
         status: "الحالة",
         date: "التاريخ",
-        demoNote: "حساب تجريبي — ياسين بن سالم، مستقل تصميم جرافيك",
+        demoNote: "حساب تجريبي - ياسين بن سالم، مستقل تصميم جرافيك",
       },
       client: {
         title: "مساحة العميل",
@@ -438,7 +438,7 @@ export const translations = {
         amount: "المبلغ",
         status: "الحالة",
         date: "التاريخ",
-        demoNote: "حساب تجريبي — نادية خليفي، عميلة في الجزائر",
+        demoNote: "حساب تجريبي - نادية خليفي، عميلة في الجزائر",
       },
       status: {
         ACTIVE: "قيد التنفيذ",

@@ -1,77 +1,7 @@
 "use client";
 
-import { use } from "react";
-import Link from "next/link";
-import {
-  ArrowLeft, Shield, Clock, MessageCircle,
-  CheckCircle2, RotateCcw, Download, AlertTriangle,
-} from "lucide-react";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { OrderStatusBadge } from "@/components/ui/OrderStatusBadge";
-import { Avatar } from "@/components/ui/Avatar";
-import { EscrowNotice } from "@/components/ui/EscrowNotice";
-import { Button } from "@/components/ui/Button";
-import { DEMO_USERS } from "@/lib/i18n/translations";
-import { useLocale } from "@/lib/i18n/LocaleProvider";
-import { formatDzd } from "@/lib/api";
-import type { OrderStatus } from "@/lib/demo-data";
-
-// Mock order data for v0 demo
-const MOCK_ORDERS: Record<string, {
-  id: string;
-  service: string;
-  freelancerName: string;
-  freelancerUsername: string;
-  clientName: string;
-  amountDzd: number;
-  status: OrderStatus;
-  date: string;
-  brief: string;
-  deadline: string;
-  deliveryFiles?: { name: string; size: string }[];
-}> = {
-  o1: {
-    id: "o1",
-    service: "Logo professionnel + fichiers sources",
-    freelancerName: "Yacine Bensalem",
-    freelancerUsername: "yacine-bensalem",
-    clientName: "Nadia Khelifi",
-    amountDzd: 3500,
-    status: "ACTIVE",
-    date: "2026-06-08",
-    brief:
-      "Logo pour ma boutique de vêtements. Couleurs préférées: vert et blanc. Style moderne et minimaliste. Je veux quelque chose de propre et élégant qui reflète la mode algérienne contemporaine.",
-    deadline: "2026-06-11",
-  },
-  o4: {
-    id: "o4",
-    service: "Site vitrine responsive",
-    freelancerName: "Amina Khelifi",
-    freelancerUsername: "amina-khelifi",
-    clientName: "Nadia Khelifi",
-    amountDzd: 15000,
-    status: "PENDING_PAYMENT",
-    date: "2026-06-09",
-    brief: "Site vitrine 5 pages pour mon agence de communication.",
-    deadline: "2026-06-16",
-  },
-  o5: {
-    id: "o5",
-    service: "Article de blog SEO (800 mots)",
-    freelancerName: "Sara Meziane",
-    freelancerUsername: "sara-meziane",
-    clientName: "Nadia Khelifi",
-    amountDzd: 2500,
-    status: "COMPLETED",
-    date: "2026-05-15",
-    brief: "Article SEO sur le thème du e-commerce en Algérie.",
-    deadline: "2026-05-17",
-    deliveryFiles: [
-      { name: "article_ecommerce_algerie.docx", size: "24 KB" },
-      { name: "article_ecommerce_algerie.pdf", size: "148 KB" },
-    ],
-  },
-};
+import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 
 const TIMELINE_STEPS: { key: OrderStatus | "BRIEF"; label: string }[] = [
   { key: "BRIEF", label: "Brief soumis" },
@@ -89,10 +19,63 @@ const STATUS_ORDER: Record<string, number> = {
   COMPLETED: 4,
 };
 
-export default function ClientOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ClientOrderDetailPage() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const id = params.id as string;
   const { locale } = useLocale();
-  const order = MOCK_ORDERS[id];
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchOrder = () => {
+    fetch(`http://localhost:4000/api/v1/orders/${id}`, {
+      headers: { "x-user-id": "c1", "x-user-role": "CLIENT" }
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) setOrder(data);
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    if (searchParams.get("payment") === "success") {
+      fetch(`http://localhost:4000/api/v1/orders/${id}/payment-success`, {
+        method: "POST",
+        headers: { "x-user-id": "c1", "x-user-role": "CLIENT" }
+      }).then(() => fetchOrder());
+    } else {
+      fetchOrder();
+    }
+  }, [id, searchParams]);
+
+  const handleConfirmDelivery = async () => {
+    if (!confirm("Confirmer la livraison et libérer le paiement ?")) return;
+    try {
+      await fetch(`http://localhost:4000/api/v1/orders/${id}/confirm`, {
+        method: "POST",
+        headers: { "x-user-id": "c1", "x-user-role": "CLIENT" }
+      });
+      fetchOrder();
+    } catch(e) {}
+  };
+
+  const handleDispute = async () => {
+    const reason = prompt("Raison du litige :");
+    if (!reason) return;
+    try {
+      await fetch(`http://localhost:4000/api/v1/orders/${id}/dispute`, {
+        method: "POST",
+        headers: { "x-user-id": "c1", "x-user-role": "CLIENT", "Content-Type": "application/json" },
+        body: JSON.stringify({ reason })
+      });
+      fetchOrder();
+    } catch(e) {}
+  };
+
+  if (loading) {
+    return <DashboardShell role="client" userName="Nadia"><div className="py-20 text-center">Chargement...</div></DashboardShell>;
+  }
 
   if (!order) {
     return (
@@ -165,12 +148,12 @@ export default function ClientOrderDetailPage({ params }: { params: Promise<{ id
             <div className="surface-card p-6">
               <h2 className="mb-3 text-lg font-semibold text-charcoal">Brief du projet</h2>
               <div className="rounded-xl bg-teal-wash/40 p-4">
-                <p className="text-sm leading-relaxed text-dark-gray">{order.brief}</p>
+                <p className="text-sm leading-relaxed text-dark-gray">{order.brief?.text || order.brief}</p>
               </div>
               <div className="mt-4 flex flex-wrap gap-4 text-sm text-mid-gray">
                 <span className="flex items-center gap-1.5">
                   <Clock size={14} className="text-teal" />
-                  Délai: {order.deadline}
+                  Délai: {new Date(order.deliveryDeadline || order.deadline).toLocaleDateString(locale)}
                 </span>
               </div>
             </div>
@@ -214,7 +197,7 @@ export default function ClientOrderDetailPage({ params }: { params: Promise<{ id
                   Vérifiez les fichiers livrés et confirmez si tout est correct.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Button variant="primary" className="flex items-center gap-2">
+                  <Button variant="primary" className="flex items-center gap-2" onClick={handleConfirmDelivery}>
                     <CheckCircle2 size={16} />
                     Confirmer la livraison
                   </Button>
@@ -230,6 +213,7 @@ export default function ClientOrderDetailPage({ params }: { params: Promise<{ id
             {(order.status === "ACTIVE" || order.status === "DELIVERED") && (
               <button
                 type="button"
+                onClick={handleDispute}
                 className="flex items-center gap-2 text-sm text-mid-gray hover:text-danger transition-colors"
               >
                 <AlertTriangle size={14} />
@@ -244,7 +228,7 @@ export default function ClientOrderDetailPage({ params }: { params: Promise<{ id
             <div className="surface-card p-5">
               <EscrowNotice
                 title="Escrow sécurisé"
-                amount={formatDzd(order.amountDzd, locale)}
+                amount={formatDzd(order.priceDzd || order.amountDzd, locale)}
                 subtitle={
                   order.status === "COMPLETED"
                     ? "Fonds libérés au freelancer"
@@ -283,15 +267,15 @@ export default function ClientOrderDetailPage({ params }: { params: Promise<{ id
               <div className="space-y-2.5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-mid-gray">Service</span>
-                  <span className="font-medium text-charcoal text-right max-w-[160px] line-clamp-1">{order.service}</span>
+                  <span className="font-medium text-charcoal text-right max-w-[160px] line-clamp-1">{order.serviceId || order.service}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-mid-gray">Date commande</span>
-                  <span className="font-medium text-charcoal">{order.date}</span>
+                  <span className="font-medium text-charcoal">{new Date(order.createdAt || order.date).toLocaleDateString(locale)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-mid-gray">Délai</span>
-                  <span className="font-medium text-charcoal">{order.deadline}</span>
+                  <span className="font-medium text-charcoal">{new Date(order.deliveryDeadline || order.deadline).toLocaleDateString(locale)}</span>
                 </div>
                 <div className="flex justify-between border-t border-light-border/60 pt-2.5">
                   <span className="text-mid-gray">Frais plateforme</span>
@@ -299,7 +283,7 @@ export default function ClientOrderDetailPage({ params }: { params: Promise<{ id
                 </div>
                 <div className="flex justify-between">
                   <span className="font-semibold text-charcoal">Total payé</span>
-                  <span className="font-bold text-teal text-base">{formatDzd(order.amountDzd, locale)}</span>
+                  <span className="font-bold text-teal text-base">{formatDzd(order.priceDzd || order.amountDzd, locale)}</span>
                 </div>
               </div>
             </div>

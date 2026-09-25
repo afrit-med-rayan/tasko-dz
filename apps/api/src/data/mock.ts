@@ -306,3 +306,127 @@ export function searchFreelancers(params: {
 
   return results;
 }
+
+export type OrderStatus = "PENDING_PAYMENT" | "ACTIVE" | "DELIVERED" | "REVISION" | "COMPLETED" | "CANCELLED" | "DISPUTE" | "DISPUTE_RESOLVED";
+export type EscrowStatus = "NONE" | "LOCKED" | "RELEASED" | "REFUNDED";
+
+export interface Order {
+  id: string;
+  clientId: string;
+  freelancerId: string;
+  serviceId: string;
+  status: OrderStatus;
+  escrowStatus: EscrowStatus;
+  brief: {
+    text: string;
+    deadline: string;
+    attachments: string[];
+  };
+  priceDzd: number;
+  deliveryDeadline: string;
+  deliveredAt?: string;
+  deliveryFiles?: string[];
+  deliveryMessage?: string;
+  createdAt: string;
+}
+
+const orders: Order[] = [
+  {
+    id: "o1",
+    clientId: "c1",
+    freelancerId: "f1",
+    serviceId: "s1",
+    status: "ACTIVE",
+    escrowStatus: "LOCKED",
+    brief: {
+      text: "Bonjour, j'ai besoin d'un logo pour mon nouveau site e-commerce de vêtements. Le style doit être minimaliste et moderne, avec les couleurs noir et or.",
+      deadline: "2026-10-01T00:00:00Z",
+      attachments: []
+    },
+    priceDzd: 3500,
+    deliveryDeadline: "2026-10-01T00:00:00Z",
+    createdAt: "2026-09-24T10:00:00Z"
+  },
+  {
+    id: "o2",
+    clientId: "c2",
+    freelancerId: "f1",
+    serviceId: "s2",
+    status: "COMPLETED",
+    escrowStatus: "RELEASED",
+    brief: {
+      text: "Cartes de visite pour notre équipe de 5 personnes.",
+      deadline: "2026-09-20T00:00:00Z",
+      attachments: []
+    },
+    priceDzd: 2500,
+    deliveryDeadline: "2026-09-20T00:00:00Z",
+    deliveredAt: "2026-09-18T14:30:00Z",
+    createdAt: "2026-09-15T09:00:00Z"
+  },
+  {
+    id: "o3",
+    clientId: "c3",
+    freelancerId: "f2",
+    serviceId: "s3",
+    status: "DISPUTE",
+    escrowStatus: "LOCKED",
+    brief: {
+      text: "Site e-commerce complet avec intégration de paiement local.",
+      deadline: "2026-10-15T00:00:00Z",
+      attachments: []
+    },
+    priceDzd: 15000,
+    deliveryDeadline: "2026-10-15T00:00:00Z",
+    createdAt: "2026-09-25T11:00:00Z"
+  },
+  {
+    id: "o4",
+    clientId: "c1",
+    freelancerId: "f4",
+    serviceId: "s5",
+    status: "DELIVERED",
+    escrowStatus: "LOCKED",
+    brief: {
+      text: "Article de blog sur l'entrepreneuriat en Algérie (800 mots).",
+      deadline: "2026-09-28T00:00:00Z",
+      attachments: []
+    },
+    priceDzd: 2500,
+    deliveryDeadline: "2026-09-28T00:00:00Z",
+    deliveredAt: "2026-09-26T08:00:00Z",
+    createdAt: "2026-09-25T09:00:00Z"
+  }
+];
+
+export function getOrdersByUserId(userId: string, role: UserRole): Order[] {
+  if (role === "ADMIN") return orders;
+  if (role === "CLIENT") {
+    return orders.filter(o => o.clientId === userId);
+  }
+  return orders.filter(o => o.freelancerId === userId);
+}
+
+export function getOrderById(id: string): Order | undefined {
+  return orders.find(o => o.id === id);
+}
+
+export function createOrder(order: Omit<Order, "id" | "createdAt" | "status" | "escrowStatus">): Order {
+  const newOrder: Order = {
+    ...order,
+    id: Math.random().toString(36).substring(7),
+    status: "PENDING_PAYMENT",
+    escrowStatus: "NONE",
+    createdAt: new Date().toISOString()
+  };
+  orders.push(newOrder);
+  return newOrder;
+}
+
+export function updateOrder(id: string, updates: Partial<Order>): Order | undefined {
+  const order = getOrderById(id);
+  if (order) {
+    Object.assign(order, updates);
+  }
+  return order;
+}
