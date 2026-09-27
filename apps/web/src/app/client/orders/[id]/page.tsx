@@ -2,6 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import {
+  ArrowLeft, CheckCircle2, Clock, RotateCcw, AlertTriangle,
+  MessageCircle, Shield, Download,
+} from "lucide-react";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { OrderStatusBadge } from "@/components/ui/OrderStatusBadge";
+import { Button } from "@/components/ui/Button";
+import { Avatar } from "@/components/ui/Avatar";
+import { EscrowNotice } from "@/components/ui/EscrowNotice";
+import { DEMO_USERS } from "@/lib/i18n/translations";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { formatDzd } from "@/lib/api";
+
+type OrderStatus = "PENDING_PAYMENT" | "ACTIVE" | "DELIVERED" | "REVISION" | "COMPLETED" | "CANCELLED" | "DISPUTE" | "DISPUTE_RESOLVED";
 
 const TIMELINE_STEPS: { key: OrderStatus | "BRIEF"; label: string }[] = [
   { key: "BRIEF", label: "Brief soumis" },

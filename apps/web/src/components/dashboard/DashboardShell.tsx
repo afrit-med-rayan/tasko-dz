@@ -53,12 +53,14 @@ export function DashboardShell({ role, userName, children, headerAction }: Dashb
         ];
 
   const isActive = (href: string) => {
-    if (href.includes("#") && !href.startsWith("#")) {
-      const base = href.split("#")[0];
-      return pathname === base;
+    if (href.includes("#")) return false;
+    
+    // Strict match for dashboard root to avoid highlighting it when on subpages
+    if (href === "/freelancer/dashboard" || href === "/client/dashboard") {
+      return pathname === href;
     }
-    if (href.startsWith("#")) return false;
-    return pathname === href || (href !== "/" && pathname.startsWith(href));
+    
+    return pathname.startsWith(href);
   };
 
   const SidebarContent = () => (

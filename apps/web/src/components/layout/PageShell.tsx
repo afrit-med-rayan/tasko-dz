@@ -9,8 +9,11 @@ const AUTH_PREFIXES = ["/freelancer/", "/client/"];
 export function PageShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuthRoute = AUTH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  
+  const isPublicProfile = pathname.match(/^\/freelancer\/[^\/]+$/) && 
+    !["dashboard", "messages", "analytics", "wallet", "orders"].includes(pathname.split("/")[2]);
 
-  if (isAuthRoute) return <>{children}</>;
+  if (isAuthRoute && !isPublicProfile) return <>{children}</>;
 
   return (
     <div className="flex min-h-screen flex-col">

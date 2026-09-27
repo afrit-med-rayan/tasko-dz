@@ -161,10 +161,12 @@ export function Hero() {
                 </div>
 
                 {/* Payment CTA */}
-                <Button variant="amber" size="lg" className="mt-5 w-full gap-2 shadow-md">
-                  <Smartphone size={18} />
-                  {t.hero.payBaridiMob}
-                </Button>
+                <Link href="/client/order/new/s1" className="block mt-5 w-full">
+                  <Button variant="amber" size="lg" className="w-full gap-2 shadow-md">
+                    <Smartphone size={18} />
+                    {t.hero.payBaridiMob}
+                  </Button>
+                </Link>
                 <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-mid-gray">
                   <Banknote size={14} />
                   {t.hero.orCib}
