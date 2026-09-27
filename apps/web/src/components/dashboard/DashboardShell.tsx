@@ -40,22 +40,25 @@ export function DashboardShell({ role, userName, children, headerAction }: Dashb
           { href: "/freelancer/dashboard", label: fd.title, icon: <LayoutDashboard size={17} /> },
           { href: "/freelancer/dashboard#services", label: fd.myServices, icon: <Briefcase size={17} /> },
           { href: "/freelancer/dashboard#orders", label: fd.orders, icon: <ShoppingBag size={17} />, badge: 3 },
-          { href: "#messages", label: fd.messages, icon: <MessageSquare size={17} />, badge: 2 },
+          { href: "/freelancer/messages", label: fd.messages, icon: <MessageSquare size={17} />, badge: 2 },
           { href: "/freelancer/wallet", label: fd.wallet, icon: <Wallet size={17} /> },
-          { href: "#analytics", label: fd.analytics, icon: <BarChart3 size={17} /> },
+          { href: "/freelancer/analytics", label: fd.analytics, icon: <BarChart3 size={17} /> },
           { href: "/freelancer/yacine-bensalem", label: fd.profile, icon: <User size={17} /> },
         ]
       : [
           { href: "/client/dashboard", label: cd.title, icon: <LayoutDashboard size={17} /> },
           { href: "/client/dashboard#orders", label: cd.orders, icon: <ShoppingBag size={17} />, badge: 2 },
-          { href: "#messages", label: cd.messages, icon: <MessageSquare size={17} /> },
-          { href: "#account", label: cd.account, icon: <User size={17} /> },
+          { href: "/client/messages", label: cd.messages, icon: <MessageSquare size={17} /> },
+          { href: "/client/account", label: cd.account, icon: <User size={17} /> },
         ];
 
   const isActive = (href: string) => {
+    if (href.includes("#") && !href.startsWith("#")) {
+      const base = href.split("#")[0];
+      return pathname === base;
+    }
     if (href.startsWith("#")) return false;
-    const base = href.split("#")[0];
-    return pathname === href || (base !== "/" && pathname.startsWith(base) && !href.includes("#"));
+    return pathname === href || (href !== "/" && pathname.startsWith(href));
   };
 
   const SidebarContent = () => (
@@ -208,12 +211,12 @@ export function DashboardShell({ role, userName, children, headerAction }: Dashb
 export function DashboardNewServiceButton() {
   const { t } = useLocale();
   return (
-    <button
-      type="button"
+    <Link
+      href="/freelancer/yacine-bensalem"
       className="inline-flex items-center gap-2 rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-teal-dark"
     >
       <Plus size={16} />
       {t.dashboard.freelancer.newService}
-    </button>
+    </Link>
   );
 }
